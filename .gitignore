@@ -1,6 +1,4 @@
-.idea
+.idea/
 *.iml
 data/
-
-# Editors
-.idea/
+scripts/python/venv/
