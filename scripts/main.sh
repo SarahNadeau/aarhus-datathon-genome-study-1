@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 # TITLE: Run the pipeline
 
 mkdir -p temp
