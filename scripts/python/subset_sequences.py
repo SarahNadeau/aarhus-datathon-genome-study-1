@@ -30,19 +30,23 @@ metadata = pd.read_csv(path_to_data + "/metadata_snpeff_tidy_" + country + ".tsv
 # Import case count data
 case_count_data = pd.read_csv(path_to_data + "/owid-covid-data.csv")
 
+# Import mutations file
+mutations = pd.read_csv(path_to_data + "/mutations_snpeff_annotated_tidy_" + country + ".tsv", sep='\t')
+
 # Filter case count data by country, date range
 case_count_data['date'] = pd.to_datetime(case_count_data['date'])
 case_count_data = case_count_data[case_count_data['iso_code'] == country_code]
 case_count_data = case_count_data[case_count_data['date'] <= pd.to_datetime(max_date)]
 case_count_data = case_count_data[case_count_data['date'] >= pd.to_datetime(min_date)]
 
-# Filter genome metadata by country, date range, host, lineages
+# Filter genome metadata by country, date range, host, lineages, presence in mutation data
 metadata['Collection date'] = pd.to_datetime(metadata['Collection date'])
 metadata = metadata[metadata['country'] == country]
 metadata = metadata[metadata['Collection date'] <= pd.to_datetime(max_date)]
 metadata = metadata[metadata['Collection date'] >= pd.to_datetime(min_date)]
 metadata = metadata[metadata['Host'] == 'Human']
 metadata = metadata[metadata['pangolin_lineage'].isin(pangolin_lineages)]
+metadata = metadata[metadata['id'].isin(mutations['id'])]
 
 # Calculate upper-bound number of sequences to take per week
 metadata['week'] = metadata['Collection date'].map(lambda x: pd.Timestamp.isocalendar(x)[1])
