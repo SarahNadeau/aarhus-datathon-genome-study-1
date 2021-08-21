@@ -13,32 +13,32 @@ try:
 except FileExistsError:
     pass
 
-# Take user input: countries, lineages, date range, weekly proportion of cases to take.
+# Parse configurations: country, lineages, date range, weekly proportion of cases to take.
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 path_to_data = config['path_to_data']
-countries = config['countries']
-country_codes = config['country_codes']
+country = config['country']
+country_code = config['country_code']
 pangolin_lineages = config['pangolin_lineages']
 min_date = config['min_date']
 max_date = config['max_date']
 subsampling_proportion = config['subsampling_proportion']
 
 # Import sequence metadata.
-metadata = pd.read_csv(path_to_data + "/metadata_snpeff_tidy_Denmark.tsv", sep='\t')
+metadata = pd.read_csv(path_to_data + "/metadata_snpeff_tidy_" + country + ".tsv", low_memory=False, sep='\t')
 
 # Import case count data
 case_count_data = pd.read_csv(path_to_data + "/owid-covid-data.csv")
 
-# Filter case count data by countries, date range
+# Filter case count data by country, date range
 case_count_data['date'] = pd.to_datetime(case_count_data['date'])
-case_count_data = case_count_data[case_count_data['iso_code'].isin(country_codes)]
+case_count_data = case_count_data[case_count_data['iso_code'] == country_code]
 case_count_data = case_count_data[case_count_data['date'] <= pd.to_datetime(max_date)]
 case_count_data = case_count_data[case_count_data['date'] >= pd.to_datetime(min_date)]
 
-# Filter genome metadata by countries, date range, host, lineages
+# Filter genome metadata by country, date range, host, lineages
 metadata['Collection date'] = pd.to_datetime(metadata['Collection date'])
-metadata = metadata[metadata['country'].isin(countries)]
+metadata = metadata[metadata['country'] == country]
 metadata = metadata[metadata['Collection date'] <= pd.to_datetime(max_date)]
 metadata = metadata[metadata['Collection date'] >= pd.to_datetime(min_date)]
 metadata = metadata[metadata['Host'] == 'Human']
