@@ -1,0 +1,31 @@
+---
+title: "Aarhus Datathon Genome Study 1"
+author:
+date: 21.08.21
+output: html_notebook
+---
+
+## Preparation
+
+Load libraries, scripts, and data:
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+source("R/vaccination.R")
+source("R/diversity.R")
+
+vacc_data <- vacc_load_data()
+div_data <- div_load_data("../temp/CHE/diversity_by_time.csv")
+```
+
+
+## Basic plots
+
+### Diversity over time
+
+```{r}
+ggplot(div_data) +
+        geom_point(aes(x = date, y = diversity_measure))
+```
