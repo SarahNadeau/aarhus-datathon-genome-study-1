@@ -29,3 +29,11 @@ div_data <- div_load_data("../temp/CHE/diversity_by_time.csv")
 ggplot(div_data) +
         geom_point(aes(x = date, y = diversity_measure))
 ```
+
+
+### Vaccination over time
+
+```{r}
+ggplot(vacc_data %>% filter(country == "Switzerland")) +
+  geom_point(aes(x = first_day_of_week, y = total_vaccinations))
+```

@@ -32,6 +32,7 @@ vacc_load_data <- function () {
     ) %>%
     group_by(country, isoyear, isoweek) %>%
     summarize(
+      first_day_of_week = min(date),
       people_vaccinated = max(people_vaccinated),
       people_fully_vaccinated = max(people_fully_vaccinated),
       total_vaccinations = max(total_vaccinations)
