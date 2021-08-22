@@ -25,13 +25,13 @@ max_date = config['max_date']
 subsampling_proportion = config['subsampling_proportion']
 
 # Import sequence metadata.
-metadata = pd.read_csv(path_to_data + "/metadata_snpeff_tidy_" + country + ".tsv", low_memory=False, sep='\t')
+metadata = pd.read_csv(path_to_data + "/metadata_snpeff_tidy_" + str.replace(country, " ", "_") + ".tsv", low_memory=False, sep='\t')
 
 # Import case count data
 case_count_data = pd.read_csv(path_to_data + "/owid-covid-data.csv")
 
 # Import mutations file
-mutations = pd.read_csv(path_to_data + "/mutations_snpeff_annotated_tidy_" + country + ".tsv", sep='\t')
+mutations = pd.read_csv(path_to_data + "/mutations_snpeff_annotated_tidy_" + str.replace(country, " ", "_") + ".tsv", sep='\t')
 
 # Filter case count data by country, date range
 case_count_data['date'] = pd.to_datetime(case_count_data['date'])
@@ -39,13 +39,12 @@ case_count_data = case_count_data[case_count_data['iso_code'] == country_code]
 case_count_data = case_count_data[case_count_data['date'] <= pd.to_datetime(max_date)]
 case_count_data = case_count_data[case_count_data['date'] >= pd.to_datetime(min_date)]
 
-# Filter genome metadata by country, date range, host, lineages, presence in mutation data
+# Filter genome metadata by country, date range, host, presence in mutation data
 metadata['Collection date'] = pd.to_datetime(metadata['Collection date'])
 metadata = metadata[metadata['country'] == country]
 metadata = metadata[metadata['Collection date'] <= pd.to_datetime(max_date)]
 metadata = metadata[metadata['Collection date'] >= pd.to_datetime(min_date)]
 metadata = metadata[metadata['Host'] == 'Human']
-metadata = metadata[metadata['pangolin_lineage'].isin(pangolin_lineages)]
 metadata = metadata[metadata['id'].isin(mutations['id'])]
 
 # Calculate upper-bound number of sequences to take per week
@@ -62,22 +61,36 @@ for index, row in metadata.iterrows():
 # Subsample genomes based on confirmed cases per year, week
 sampled_ids = []
 subsampling_outfile = open("temp/subsampling_summary.csv", "w")
-subsampling_outfile.write('year,week,cases,genomes,genomes_sampled\n')
+subsampling_outfile.write('year,week,n_cases,n_genomes_total,n_genomes_sampled_total,n_genomes_analyzed_focal_lineages\n')
 for year_week in year_weeks:
+    # Get number of cases that week
     case_counts = case_count_data[case_count_data['year'] == year_week[0]]
     case_counts = case_counts[case_counts['week'] == year_week[1]]
     n_cases = case_counts['new_cases'].sum()
 
+    # Get genomes from that week
     genomes = metadata[metadata['year'] == year_week[0]]
     genomes = genomes[genomes['week'] == year_week[1]]
-    n_genomes = genomes.shape[0]
+    n_genomes_total = genomes.shape[0]
 
+    # Sample from all genomes based on cases
     genomes = genomes.sample(frac=1)  # shuffle genomes
-    n_to_sample = int(np.floor(min(n_genomes, n_cases * subsampling_proportion)))
+    n_to_sample = int(np.floor(min(n_genomes_total, n_cases * subsampling_proportion)))
     genomes = genomes.head(n_to_sample)
+    n_genomes_sampled_total = genomes.shape[0]
+
+    # Select only genomes from lineage(s) of interest
+    genomes = genomes[genomes['pangolin_lineage'].isin(pangolin_lineages)]
+    n_genomes_analyzed_focal_lineages = genomes.shape[0]
     sampled_ids = sampled_ids + genomes['id'].astype('string').tolist()
 
-    subsampling_outfile.write('{},{},{},{},{}\n'.format(year_week[0], year_week[1], n_cases, n_genomes, genomes.shape[0]))
+    subsampling_outfile.write('{},{},{},{},{},{}\n'.format(
+        year_week[0],
+        year_week[1],
+        n_cases,
+        n_genomes_total,
+        n_genomes_sampled_total,
+        n_genomes_analyzed_focal_lineages))
 
 subsampling_outfile.close()
 
