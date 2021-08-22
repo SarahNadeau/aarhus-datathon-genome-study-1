@@ -36,8 +36,14 @@ ggplot(div_data) +
 ### Vaccination over time
 
 ```{r}
-ggplot(vacc_data) +
-  geom_point(aes(x = first_day_of_week, y = people_vaccinated_per_hundred))
+vacc_full_data <- vacc_load_data()
+ggplot(vacc_full_data) +
+  geom_line(aes(x = date, y = people_vaccinated_per_hundred, color = country), size=1) +
+  scale_y_continuous(
+          name = "Viccination per hundred people (at least one dosis)",
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1), text = element_text(size=20))
 ```
 
 
