@@ -1,7 +1,7 @@
 path_to_data: data
 
-country: Switzerland  # Currently only implemented for Switzerland or Denmark
-country_code: CHE
+country: South Africa  # Currently only implemented for Switzerland, Denmark, and South Africa
+country_code: ZAF
 
 pangolin_lineages:
   - B.1.617.2

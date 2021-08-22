@@ -22,7 +22,7 @@ ids = pd.read_csv("temp/subsampled_ids.csv")
 mut_dat_dict = calc_hamdist_pop.load_mut_dat_dict()
 
 # Import metadata for genome dates
-metadata = pd.read_csv(path_to_data + "/metadata_snpeff_tidy_" + country + ".tsv", low_memory=False, sep='\t')
+metadata = pd.read_csv(path_to_data + "/metadata_snpeff_tidy_" + str.replace(country, " ", "_") + ".tsv", low_memory=False, sep='\t')
 metadata['Collection date'] = pd.to_datetime(metadata['Collection date'])
 metadata = metadata[metadata['id'].isin(ids['id'])]
 
