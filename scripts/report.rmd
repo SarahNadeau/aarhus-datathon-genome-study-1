@@ -16,8 +16,10 @@ library(ggplot2)
 source("R/vaccination.R")
 source("R/diversity.R")
 
-vacc_data <- vacc_load_data()
-div_data <- div_load_data("../temp/CHE/diversity_by_time.csv")
+vacc_data <- vacc_load_data() %>% filter(country == "Denmark")
+div_data <- div_load_data("../temp/DNK/diversity_by_time.csv")
+merged_data <- div_data %>%
+    full_join(vacc_data, by = c("date" = "date"))
 ```
 
 
@@ -34,6 +36,20 @@ ggplot(div_data) +
 ### Vaccination over time
 
 ```{r}
-ggplot(vacc_data %>% filter(country == "Switzerland")) +
-  geom_point(aes(x = first_day_of_week, y = total_vaccinations))
+ggplot(vacc_data) +
+  geom_point(aes(x = first_day_of_week, y = people_vaccinated_per_hundred))
+```
+
+
+## Diversity vs. Vaccination
+
+```{r}
+ggplot(merged_data, aes(x = date)) +
+  geom_point(aes(y = diversity_measure)) +
+  geom_line(aes(y = people_vaccinated_per_hundred)) +
+  scale_y_continuous(
+    name = "Diversity (points)",
+    sec.axis = sec_axis(~.*1, name="Vaccination per hundred people (line)")
+  ) +
+  theme_bw()
 ```

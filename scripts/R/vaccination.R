@@ -19,23 +19,12 @@ vacc_load_data <- function () {
       "daily_vaccinations_per_million" = col_double()
     )
   ) %>%
-    filter(location %in% c("Denmark", "Switzerland")) %>%
+    filter(location %in% c("Denmark", "Switzerland", "South Africa")) %>%
     mutate(
       date = ymd(date)
     ) %>%
     rename(
       country = location
-    ) %>%
-    mutate(
-      isoyear = as.integer(isoyear(date)),
-      isoweek = as.integer(isoweek(date))
-    ) %>%
-    group_by(country, isoyear, isoweek) %>%
-    summarize(
-      first_day_of_week = min(date),
-      people_vaccinated = max(people_vaccinated),
-      people_fully_vaccinated = max(people_fully_vaccinated),
-      total_vaccinations = max(total_vaccinations)
     ) %>%
     drop_na(total_vaccinations) %>%
     replace_na(list(
