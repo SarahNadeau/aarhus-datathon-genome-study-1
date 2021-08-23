@@ -19,7 +19,7 @@ vacc_load_data <- function () {
       "daily_vaccinations_per_million" = col_double()
     )
   ) %>%
-    filter(location %in% c("Denmark", "Switzerland")) %>%
+    filter(iso_code %in% c("DNK", "CHE", "ZAF")) %>%
     mutate(
       date = ymd(date)
     ) %>%

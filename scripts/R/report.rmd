@@ -13,13 +13,25 @@ Load libraries, scripts, and data:
 library(tidyverse)
 library(lubridate)
 library(ggplot2)
-source("R/vaccination.R")
-source("R/diversity.R")
+source("scripts/R/vaccination.R")
+source("scripts/R/diversity.R")
 
-vacc_data <- vacc_load_data() %>% filter(country == "Denmark")
-div_data <- div_load_data("../temp/DNK/diversity_by_time.csv")
+vacc_data <- vacc_load_data()
+is_first <- T
+for (dir in list.files("temp", full.names = F)) {
+  filepath = paste("temp", dir, "diversity_by_time.csv", sep = "/")
+  print(dir)
+  div_data_tmp <- div_load_data(filepath, dir)
+  if (is_first) {
+    is_first <- F
+    div_data <- div_data_tmp
+  } else {
+    div_data <- rbind(div_data, div_data_tmp)
+  }
+}
+
 merged_data <- div_data %>%
-    full_join(vacc_data, by = c("date" = "date"))
+    full_join(vacc_data, by = c("iso_code", "date"))
 ```
 
 
@@ -50,12 +62,19 @@ ggplot(vacc_full_data) +
 ## Diversity vs. Vaccination
 
 ```{r}
-ggplot(merged_data, aes(x = date)) +
+ggplot(merged_data %>% filter(lineage == "alpha"), aes(x = date)) +
   geom_point(aes(y = diversity_measure)) +
   geom_line(aes(y = people_vaccinated_per_hundred)) +
+  facet_grid(iso_code ~ .) +
   scale_y_continuous(
-    name = "Diversity (points)",
-    sec.axis = sec_axis(~.*1, name="Vaccination per hundred people (line)")
-  ) +
+    name = "Alpha diversity (mean pairwise SNP distance)",
+    sec.axis = sec_axis(~.*1, name="Vaccination per hundred people (line)")) +
+  scale_x_date(
+    date_labels = "%b. %d",
+    date_breaks = "6 weeks",
+    limits = c(as.Date("2021-01-01"), as.Date("2021-07-26"))) +
   theme_bw()
+
+ggsave("figures/alpha_diversity_vs_vaccines.png",
+       width = 4, height = 5, units = "in", dpi = 300)
 ```
