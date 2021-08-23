@@ -16,4 +16,4 @@ The data is visualized using [R scripts](scripts/R).
 * Edit the configurations in [config.yaml](config.yaml) as desired
 * Change the -m input in [main.sh](scripts/main.sh) to the appropriate country's mutation data file
 * Run `bash scripts/main.sh` in your command line
-* Run the [visualization R script](scripts/report.Rmd) in your IDE of choice to generate an HTML report
+* Run the [visualization R script](scripts/R/report.Rmd) in your IDE of choice to generate an HTML report
